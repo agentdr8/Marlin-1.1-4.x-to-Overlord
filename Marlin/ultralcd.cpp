@@ -34,6 +34,11 @@
 #include "configuration_store.h"
 #include "utility.h"
 #include "parser.h"
+#include <Wire.h> //GGE
+
+#define OVLCTRL_ADDRESS 0b1100000 // GGE Adress from Dreammaker Source
+
+uint8_t btn_cntr = 0;
 
 #if HAS_BUZZER && DISABLED(LCD_USE_I2C_BUZZER)
   #include "buzzer.h"
@@ -783,8 +788,9 @@ void kill_screen(const char* lcd_msg) {
  *
  */
 void lcd_buzz(const long duration, const uint16_t freq) {
+  
   #if ENABLED(LCD_USE_I2C_BUZZER)
-    lcd.buzz(duration, freq);
+    lcd_buzz(duration, freq); //GGE 
   #elif PIN_EXISTS(BEEPER)
     buzzer.tone(duration, freq);
   #else
@@ -797,13 +803,17 @@ void lcd_quick_feedback(const bool clear_buttons) {
   #if ENABLED(ULTIPANEL)
     lcd_refresh();
     if (clear_buttons) buttons = 0;
-    next_button_update_ms = millis() + 500; 
+    next_button_update_ms = millis() + 200; //GGE was 500 
   #else
     UNUSED(clear_buttons);
   #endif
 
   // Buzz and wait. The delay is needed for buttons to settle!
   lcd_buzz(LCD_FEEDBACK_FREQUENCY_DURATION_MS, LCD_FEEDBACK_FREQUENCY_HZ);
+  Wire.beginTransmission(OVLCTRL_ADDRESS); //GGE 03.02.19
+  Wire.write(9); //GGE 03.02.19
+  Wire.write(0); //GGE 03.02.19
+  Wire.endTransmission(); //GGE 03.02.19
 
   #if ENABLED(ULTIPANEL)
     #if ENABLED(LCD_USE_I2C_BUZZER)
@@ -820,6 +830,11 @@ void lcd_quick_feedback(const bool clear_buttons) {
     if (good) {
       lcd_buzz(100, 659);
       lcd_buzz(100, 698);
+      
+      Wire.beginTransmission(OVLCTRL_ADDRESS); //GGE 03.02.19
+      Wire.write(9); //GGE 03.02.19
+      Wire.write(3); //GGE 03.02.19
+      Wire.endTransmission(); //GGE 03.02.19
     }
     else lcd_buzz(20, 440);
   }
@@ -5577,17 +5592,71 @@ void lcd_reset_alert_level() { lcd_status_message_level = 0; }
           if (false) {
             // for the else-ifs below
           }
+          //
+          // Buttons with fast scrolling for Overlord GGE 03.01.19
+          //
           #if BUTTON_EXISTS(UP)
-            else if (BUTTON_PRESSED(UP)) {
+            else if (BUTTON_PRESSED(UP) && btn_cntr <= 9) {
+              
+              btn_cntr = btn_cntr + 1; 
+      
               encoderDiff = -(ENCODER_UD_STEPS);
-              next_button_update_ms = now + 300;  
+            // BEEP Sound
+                Wire.beginTransmission(OVLCTRL_ADDRESS); 
+                Wire.write(9); 
+                Wire.write(2); 
+                Wire.endTransmission(); 
+                
+                next_button_update_ms = now + 250; // Slow scrolling 250 
             }
+            else if (BUTTON_PRESSED(UP) && btn_cntr >= 9) {
+              
+              btn_cntr = btn_cntr + 1; 
+      
+              encoderDiff = -(ENCODER_UD_STEPS);
+
+                Wire.beginTransmission(OVLCTRL_ADDRESS); 
+                Wire.write(9);
+                Wire.write(2); 
+                Wire.endTransmission(); 
+                
+                next_button_update_ms = now + 60; // GGE fast scrolling 
+            }
+
           #endif
+
           #if BUTTON_EXISTS(DWN)
-            else if (BUTTON_PRESSED(DWN)) {
+            else if (BUTTON_PRESSED(DWN) && btn_cntr <= 9) {
+
+              btn_cntr = btn_cntr + 1; 
+            
               encoderDiff = ENCODER_UD_STEPS;
-              next_button_update_ms = now + 300;  
+                
+                Wire.beginTransmission(OVLCTRL_ADDRESS); 
+                Wire.write(9); 
+                Wire.write(2); 
+                Wire.endTransmission(); 
+                
+                next_button_update_ms = now + 250; // slow scrolling 
             }
+
+            else if (BUTTON_PRESSED(DWN) && btn_cntr >= 9) {
+              
+              btn_cntr = btn_cntr + 1; 
+           
+              encoderDiff = ENCODER_UD_STEPS;
+                
+                Wire.beginTransmission(OVLCTRL_ADDRESS); 
+                Wire.write(9); 
+                Wire.write(2); 
+                Wire.endTransmission(); 
+                
+                next_button_update_ms = now + 60; //fast scrolling
+            }
+            else if (!BUTTON_PRESSED(DWN)) { 
+              btn_cntr = 0;
+                        }
+
           #endif
           #if BUTTON_EXISTS(LFT)
             else if (BUTTON_PRESSED(LFT)) {
