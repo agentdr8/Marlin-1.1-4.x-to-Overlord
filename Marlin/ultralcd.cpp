@@ -5596,37 +5596,39 @@ void lcd_reset_alert_level() { lcd_status_message_level = 0; }
           // Buttons with fast scrolling for Overlord GGE 03.01.19
           //
           #if BUTTON_EXISTS(UP)
-            else if (BUTTON_PRESSED(UP) && btn_cntr <= 9) {
+            else if (BUTTON_PRESSED(UP) && btn_cntr <= 3) {
               
               btn_cntr = btn_cntr + 1; 
       
               encoderDiff = -(ENCODER_UD_STEPS);
-            // BEEP Sound
+            // Tick Sound
                 Wire.beginTransmission(OVLCTRL_ADDRESS); 
                 Wire.write(9); 
                 Wire.write(2); 
                 Wire.endTransmission(); 
-                
+
                 next_button_update_ms = now + 250; // Slow scrolling 250 
             }
-            else if (BUTTON_PRESSED(UP) && btn_cntr >= 9) {
+            else if (BUTTON_PRESSED(UP) && btn_cntr >= 3) {
               
               btn_cntr = btn_cntr + 1; 
       
-              encoderDiff = -(ENCODER_UD_STEPS);
+              encoderDiff = -(ENCODER_UD_STEPS *4);
 
                 Wire.beginTransmission(OVLCTRL_ADDRESS); 
                 Wire.write(9);
                 Wire.write(2); 
-                Wire.endTransmission(); 
-                
-                next_button_update_ms = now + 60; // GGE fast scrolling 
+                Wire.write(9);
+                Wire.write(2); 
+                Wire.endTransmission();
+
+                next_button_update_ms = now + 250; // GGE fast scrolling 
             }
 
           #endif
 
           #if BUTTON_EXISTS(DWN)
-            else if (BUTTON_PRESSED(DWN) && btn_cntr <= 9) {
+            else if (BUTTON_PRESSED(DWN) && btn_cntr <= 3) {
 
               btn_cntr = btn_cntr + 1; 
             
@@ -5636,22 +5638,24 @@ void lcd_reset_alert_level() { lcd_status_message_level = 0; }
                 Wire.write(9); 
                 Wire.write(2); 
                 Wire.endTransmission(); 
-                
+
                 next_button_update_ms = now + 250; // slow scrolling 
             }
 
-            else if (BUTTON_PRESSED(DWN) && btn_cntr >= 9) {
+            else if (BUTTON_PRESSED(DWN) && btn_cntr >= 3) {
               
               btn_cntr = btn_cntr + 1; 
            
-              encoderDiff = ENCODER_UD_STEPS;
+              encoderDiff = ENCODER_UD_STEPS * 4;
                 
                 Wire.beginTransmission(OVLCTRL_ADDRESS); 
                 Wire.write(9); 
                 Wire.write(2); 
+                Wire.write(9); 
+                Wire.write(2); 
                 Wire.endTransmission(); 
-                
-                next_button_update_ms = now + 60; //fast scrolling
+
+                next_button_update_ms = now + 250; //fast scrolling
             }
             else if (!BUTTON_PRESSED(DWN)) { 
               btn_cntr = 0;

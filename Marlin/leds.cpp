@@ -38,6 +38,10 @@
   #include "pca9632.h"
 #endif
 
+#if ENABLED(STM8S003F3_OVERLORD)
+  #include "stm8s003f3_OVERLORD.h"
+#endif
+
 #if ENABLED(LED_COLOR_PRESETS)
   const LEDColor LEDLights::defaultLEDColor = MakeLEDColor(
     LED_USER_PRESET_RED,
@@ -112,7 +116,7 @@ void LEDLights::set_color(const LEDColor &incol
 
   #endif
 
-  #if ENABLED(PCA9632)
+  #if ENABLED(PCA9632) || ENABLED(STM8S003F3_OVERLORD) 
     // Update I2C LED driver
     pca9632_set_led_color(incol);
   #endif
@@ -125,7 +129,7 @@ void LEDLights::set_color(const LEDColor &incol
 }
 
 void LEDLights::set_white() {
-  #if ENABLED(RGB_LED) || ENABLED(RGBW_LED) || ENABLED(BLINKM) || ENABLED(PCA9632)
+  #if ENABLED(RGB_LED) || ENABLED(RGBW_LED) || ENABLED(BLINKM) || ENABLED(PCA9632) || ENABLED(STM8S003F3_OVERLORD) 
     set_color(LEDColorWhite());
   #endif
   #if ENABLED(NEOPIXEL_LED)

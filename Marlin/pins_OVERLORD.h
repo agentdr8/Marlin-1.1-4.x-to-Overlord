@@ -96,7 +96,8 @@
   #define FAN_PIN             7
 
   #define PS_ON_PIN           12
-  #define EXP_VOLTAGE_LEVEL_PIN 34 //GGE Test
+  #define EXP_VOLTAGE_LEVEL_PIN 65 //GGE Test pin 34 or 65 06.01.19
+
  
  // #define KILL_PIN           -1
  // #define SUICIDE_PIN        12  //PIN that has to be turned on right after start, to keep power flowing.
